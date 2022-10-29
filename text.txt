@@ -1,0 +1,157 @@
+command:
+    go mod init <module-path>
+
+    create a new module
+    module path can be a repository path like github/sajjadpld/test
+
+    it make go.mod file
+
+
+-------------------------------------------------------------------------------
+
+all our code must be in a package.
+in go files at the begining add this:
+
+package main
+
+the first statment in Go file must be package name.
+
+--------------------------------------------------------------------------------
+
+func main(){}
+
+this is a Go project entery point.
+
+a application must have a main function or an entery point only
+
+--------------------------------------------------------------------------------
+
+for importing packages use:
+
+import "fmt"
+
+or
+
+import (
+    fmt
+)
+
+now we imported fmt package
+
+------------------------------------------------------------------------------------
+
+a package is a collection of source files
+
+---------------------------------------------------------------------------------
+
+for running a Go file, we must run below command:
+go run file_name.go
+
+-------------------------------------------------------------------------------------
+
+a simple hello world app
+
+package main
+
+import "fmt"
+
+func main(){
+	fmt.Println("hello world")
+}
+
+
+-----------------------------------------------------------------------------------------
+
+variable declaration:
+
+var name = "sajjad"
+
+or
+
+name := "sajjad"
+
+
+------------------------------------------------------------------------------------------
+
+variables and imported package must be use, if you dont use them, you get compile error
+
+------------------------------------------------------------------------------------------
+
+declar a constant:
+
+const age = 24
+
+--------------------------------------------------------------------------------------------
+
+sample code for formatting output:
+
+++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+func main() {
+
+	var name = "sajjad"
+	family := "PLD"
+
+	const age = 24
+
+	fmt.Printf("Hi, my name is %v and my last name is %v, im %v years old", name, family, age)
+}
++++++++++++++++++++++++++++++++
+
+output is :
+Hi, my name is sajjad and my last name is PLD, im 24 years old
+
+--------------------------------------------------------------------------------------------
+
+for initial an variable for later, we must declare the variable type:
+
+	var fatherName string
+
+	fatherName = "Mahmoud"
+
+	fmt.Println(fatherName)
+
+--------------------------------------------------------------------------------------------
+
+for print variable type:
+
+fmt.Printf("the type of fatherName is %T\n", fatherName)
+
+%T is for getting variable Type
+
+--------------------------------------------------------------------------------------------------
+
+you can write these too:
+
+var v1 int = 85
+const c1 string = "sajjad"
+
+these are as same as below:
+
+var v1 = 85
+const c1 = "sajjad"
+
+or for var is:
+v1 := 85
+
+-----------------------------------------------------------------------------------------------------
+
+compare to Java data type:
+
+Go          Java
+int8    =>  byte
+int16    =>  short
+int32    =>  int
+int64    =>  long
+
+Go          Java
+uint8    =>  ubyte
+uint16    =>  ushort
+uint32    =>  uint
+uint64    =>  ulong
+
+-----------------------------------------------------------------------------------------------------
+
