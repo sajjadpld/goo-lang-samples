@@ -21,5 +21,14 @@ func main() {
 
 	fmt.Println(fatherName)
 
+	fmt.Println(&fatherName)
+
 	fmt.Printf("the type of fatherName is %T\n", fatherName)
+
+
+	var gfName string
+	fmt.Scan(&gfName)
+
+	fmt.Printf("your gir friend name is %v", gfName)
+
 }

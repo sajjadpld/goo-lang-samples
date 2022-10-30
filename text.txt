@@ -155,3 +155,38 @@ uint64    =>  ulong
 
 -----------------------------------------------------------------------------------------------------
 
+pointers in Go
+
+	var fatherName string
+
+	fatherName = "Mahmoud"
+
+	fmt.Println(fatherName)
+
+	fmt.Println(&fatherName)
+
+variable address to its value in memory (pointer) in Go is "&"
+
+the output is:
+Mahmoud
+0xc000046290
+
+--------------------------------------------------------------------------------------------------------
+
+for getting user input sample code:
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+func main(){
+	var gfName string
+	fmt.Scan(&gfName)
+
+	fmt.Printf("your gir friend name is %v", gfName)
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---------------------------------------------------------------------------------------------------------
+
