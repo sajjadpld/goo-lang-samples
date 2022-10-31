@@ -190,3 +190,138 @@ func main(){
 
 ---------------------------------------------------------------------------------------------------------
 
+in Go arrays are fixed size
+
+for declare an arraye use this:
+++++++++++++++++++++++++++++++++++++++++++++++++
+	var books = [3]string {"a","b","c"}
+
+	fmt.Println(books)
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+the output is :
+[a b c]
+
+---------------------------------------------------------------------------------------------------------
+
+for declaring empty array and fill array index use this:
++++++++++++++++++++++++++++++++++++++++++++++
+	var books [3]string
+
+	books[0] = "a"
+	books[1] = "b"
+	books[2] = "c"
+
+	fmt.Println(books)
++++++++++++++++++++++++++++++++++++++++++++++
+
+the output is :
+[a b c]
+
+-----------------------------------------------------------------------------------------------------------
+
+for getting arraye size or length use this:
+
+len(array)
+
+-----------------------------------------------------------------------------------------------------------
+
+when we dont know the size of the array for declaration array, we can use slice.
+slice basicly is an abstraction of anj array, so it uses the array type under the hood but has dynamic size.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	var books []string
+
+	books = append(books, "a")
+	books = append(books, "b")
+	books = append(books, "c")
+
+	fmt.Println(books)
+	fmt.Println(books[0])
+	fmt.Println(len(books))
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+or use this instead of first line:
+
+books := []string{}
+
+-----------------------------------------------------------------------------------------------------------------
+
+in Go we jus have "for" for loop.
+no "while", "do while" and "foreach"!
+
+for declare an infinite loop:
+
+++++++++++++++++++++++++++++++++++++
+	for {
+		fmt.Println("line")
+	}
+++++++++++++++++++++++++++++++++++++
+
+----------------------------------------------------------------------------------------------------------------
+
+"rage" iterates over elements for different data structures (so not only arrayes and slices). for arrayes and slices, "range" provides the "index" and "value" for each element.
+
++++++++++++++++++++++++++
+	var books = [8]string {"a", "b","c", "d","e", "f","g", "h"}
+
+	for index, value := range books {
+		fmt.Println(index, value)
+	}
+++++++++++++++++++++++++++++
+
+the output is :
+0 a
+1 b
+2 c
+3 d
+4 e
+5 f
+6 g
+7 h
+
+
+you can ignore unuse variable:
+
++++++++++++++++++++++++++
+	var books = [8]string {"a", "b","c", "d","e", "f","g", "h"}
+
+	for _, value := range books {
+		fmt.Println(value)
+	}
+++++++++++++++++++++++++++++
+
+or
+
++++++++++++++++++++++++++
+	var books = [8]string {"a", "b","c", "d","e", "f","g", "h"}
+
+	for index, _ := range books {
+		fmt.Println(index)
+	}
+++++++++++++++++++++++++++++
+
+------------------------------------------------------------------------------------------------------------------------
+
+strings.Fields("str with space")
+
+it spilite string by spaces and return an array
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	str := "my name is sajjad"
+
+	fmt.Println(strings.Fields(str))
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++
+the output is :
+[my name is sajjad]
+
+---------------------------------------------------------------------------------------------------------------------------
