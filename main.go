@@ -2,11 +2,19 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
-func main() {
-	str := "my name is sajjad"
+type userData struct {
+	name  string
+	email string
+}
 
-	fmt.Println(strings.Fields(str))
+func main() {
+	data := userData{name: "sajjad", email: "1234"}
+	fmt.Println(data)
+	fmt.Println(data.email)
+
+	data.email = "email@mm.com"
+
+	fmt.Println(data.email)
 }

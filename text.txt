@@ -70,6 +70,34 @@ or
 
 name := "sajjad"
 
+var i, j = 1, 2
+or
+var i, j int = 1, 2
+or
+c, python, java := true, false, "no!"
+
+or this way:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+	"math/cmplx"
+)
+
+var (
+	ToBe bool = false
+	MaxInt uint64 = 1<<64 - 1
+	Z 	complex128 = cmplx.Sqrt(-5 + 12i) 
+)
+
+
+func main (){
+	fmt.Printf("Type: %T Value %v \n", ToBe, ToBe)
+	fmt.Printf("Type: %T Value %v \n", MaxInt, MaxInt)
+	fmt.Printf("Type: %T Value %v \n", Z, Z)
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ------------------------------------------------------------------------------------------
 
@@ -80,6 +108,15 @@ variables and imported package must be use, if you dont use them, you get compil
 declar a constant:
 
 const age = 24
+
+Constants can be character, string, boolean, or numeric values.
+
+Constants cannot be declared using the := syntax.
+
+const (
+	c1 = 24
+	c2 = 85
+)
 
 --------------------------------------------------------------------------------------------
 
@@ -224,6 +261,9 @@ for getting arraye size or length use this:
 
 len(array)
 
+
+this function is use for array and slice and strings.
+
 -----------------------------------------------------------------------------------------------------------
 
 when we dont know the size of the array for declaration array, we can use slice.
@@ -250,6 +290,15 @@ books := []string{}
 in Go we jus have "for" for loop.
 no "while", "do while" and "foreach"!
 
+for declar a simple loop:
++++++++++++++++++++++++++++++++++
+	sum := 0
+	for i := 0; i < 10; i++ {
+		sum += i
+	}
+	fmt.Println(sum)
++++++++++++++++++++++++++++++++++
+
 for declare an infinite loop:
 
 ++++++++++++++++++++++++++++++++++++
@@ -257,6 +306,31 @@ for declare an infinite loop:
 		fmt.Println("line")
 	}
 ++++++++++++++++++++++++++++++++++++
+
+condition in loop:
+
++++++++++++++++++++++++++++++++++++++
+
+	for condition {
+		//code
+	}
+++++++++++++++++++++++++++++++++++++
+sample:
++++++++++++++++++++++++++++++++++++++
+	sum := 1
+	for ; sum < 1000; {
+		sum += sum
+	}
+	fmt.Println(sum)
++++++++++++++++++++++++++++++++++++++
+or
++++++++++++++++++++++++++++++++++++++++++
+	sum := 1
+	for sum < 1000 {
+		sum += sum
+	}
+	fmt.Println(sum)
++++++++++++++++++++++++++++++++++++++++++
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -325,3 +399,418 @@ the output is :
 [my name is sajjad]
 
 ---------------------------------------------------------------------------------------------------------------------------
+
+condition:
+
+if condition {
+	//code
+} else if condition {
+	//code
+} else {
+	//code
+}
+
+
+Like for, the if statement can start with a short statement to execute before the condition.
+
+Variables declared by the statement are only in scope until the end of the if.
+
++++++++++++++++++++++++++++++++++++++++++++++
+func pow(x, n, lim float64) float64 {
+	if v := math.Pow(x, n); v < lim {
+		return v
+	}
+	return lim
+}
++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+
+checking string contains and another string:
+
++++++++++++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	str := "my name is sajjad"
+
+	fmt.Println(strings.Contains(str, "sajjad"))
+}
++++++++++++++++++++++++++++++++++++++++++++++
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+switch case:
+
+switch variable {
+	case expretion:
+		//code
+	case expretion:
+		//code
+	case expretion:
+		//code
+	case expretion:
+		//code
+	case expretion:
+		//code
+	default:
+		//code
+}
+
+switch city {
+	case "city1":
+		//code
+	case "city2", "city3":
+		//code this is ||
+	case "city4", "city5":
+		//code this is ||
+	case "city6":
+		//code
+	default:
+		//code
+}
+
+Switch cases evaluate cases from top to bottom, stopping when a case succeeds.
+
+-----------------------------------------------------------------------------------------------------------------
+
+function:
+
+with no param:
+
++++++++++++++++++++++++++++++
+func fn(){
+	//code
+}
++++++++++++++++++++++++++++++
+use:
+fn()
+
+with string param:
++++++++++++++++++++++++++++++
+func fn(p1 string){
+	fmt.Println(p1)
+}
++++++++++++++++++++++++++++++
+use:
+fn("sajjad")
+
+with arraye param:
++++++++++++++++++++++++++++++
+func fn(arr []int){
+	fmt.Println(arr)
+}
+++++++++++++++++++++++++++++
+use:
+var arr = [5]int {1,2,3,4,5}
+fn(arr)
+
+with return:
++++++++++++++++++
+func fn() string{
+	str := "sajjad"
+
+	return str
+}
+++++++++++++++++++
+use:
+str := fn()
+
+return multiple values:
+++++++++++++++++++++++++++
+func fn() (int, string){
+	in := 24
+	str := "sajjad"
+
+	return in, str
+}
+++++++++++++++++++++++++
+use:
+in, st := fn()
+
+-------------------------------------------------------------------------
+
+package level variables are variables that declared in package (not function) and can access in all functions:
+
+++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+)
+
+var name string = "sajjad"
+
+func main() {
+	fmt.Println(name)
+}
++++++++++++++++++++++++++++++
+
+define variables as "local" as possible.
+
+-------------------------------------------------------------------------------
+
+packages:
+
+Go programes are orgnized into packages.
+A package is a collection of Go files.
+
+Variables and functions defiened outside any function (package level variables) can be accessed in all other files within the same package.
+
+sample:
+
+helper.go:
+++++++++++++++++++
+package main
+
+import "strings"
+
+func validateEmain() bool{
+	return strings.Contains(email, "@")
+}
++++++++++++++++++++
+
+main.go:
++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+)
+
+var email string = "sajjad@gmailcom"
+
+func main() {
+	fmt.Println(validateEmain())
+}
++++++++++++++++++++++++
+
+for run project:
+go run main.go helper.go
+or
+go run .
+
+this sample was for same named package(main) or same package.
+for multi package we must do this:
+
+run this:
+go mod init <module-path>
+
+it makes go.mod file and <module-path> is or module name and for importing we use its name.
+
+for make a variable or function public in Go, we must make first letter of the name captal, like:
+func validateEmain(){...}	=>	func ValidateEmain(){...}.
+put package files in same name directory.
+
+now the structure is:
+
+go.mod:
+++++++++++++++++++++++++++
+module booking-app
+
+go 1.13
+++++++++++++++++++++++++++
+
+helper/helper.go
++++++++++++++++++++++++++++
+package helper
+
+import "strings"
+
+func ValidateEmain(email string) bool{
+	return strings.Contains(email, "@")
+}
++++++++++++++++++++++++++++
+
+main.go
+++++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+	"goo-lang-samples/helper"
+)
+
+var email string = "sajjad@gmailcom"
+
+func main() {
+	fmt.Println(helper.ValidateEmain(email))
+}
+++++++++++++++++++++++++++
+
+-----------------------------------------------------------------------
+
+variable scopes:
+
+we declare variables in 3 mode:
+local
+package
+global
+
+local: 
+we declar variables in a function and can be used only in that function.
+we declar variables in a block of code like for, if, else and can be used only in that block.
+
+package:
+we declar variables outof function, in package and can be used in all the same package.
+
+global:
+we declar variables outside all functions (package variable) with uppercase first letter and this can be used everywhere across all packages.
+
+--------------------------------------------------------------------------
+
+maps:
+
+unique keys to value.
+all keys have the same data type.
+all values have the same data type.
+
++++++++++++++++++++++++++++++++++++++
+var userData = map[string]string
++++++++++++++++++++++++++++++++++++++
+
+map[string]	=>	the key data type is string
+string	=>	the value data type is string
+
+for create empty map:
+++++++++++++++++++++++++++++++++++++++++
+var userData = make(map[string]string)
+++++++++++++++++++++++++++++++++++++++++
+
+for adding do this:
+++++++++++++++++++++++++++++++++++++++++++
+	var userData = make(map[string]string)
+
+	userData["userName"] = "sajjadpld"
+	userData["password"] = "1234"
+
+	fmt.Println(userData)
+++++++++++++++++++++++++++++++++++++++++++
+
+the output is:
+map[password:1234 userName:sajjadpld]
+
+for gett specific key:
+++++++++++++++++++++++++++++++++++++
+fmt.Println(userData["userName"])
++++++++++++++++++++++++++++++++++++++
+
+for declare an array of map:
+++++++++++++++++++++++++++++++++++++
+var books = make([]map[string]string, 0)
+++++++++++++++++++++++++++++++++++++
+the make function second param can be any number, because it makes slice and the size of slice increse.
+
+--------------------------------------------------------------------------------------------------------------
+
+struct:
+struct is like class OOP languages but its different with it.
+it's like a lighweight class wich dosen't support inheritance.
+it can contains mixed data types and define a structure of data.
+
+++++++++++++++++++++++++++++++++
+package main
+
+import (
+	"fmt"
+)
+
+type userData struct {
+	name  string
+	email string
+}
+
+func main() {
+	data := userData{"sajjad", "1234"}
+	fmt.Println(data)
+}
+++++++++++++++++++++++++++++++++
+
+for initiate new struct you can use:
++++++++++++++++++++++++++++++++++
+data := userData{"sajjad", "1234"}
++++++++++++++++++++++++++++++++++
+or
++++++++++++++++++++++++++++++++++++
+data := userData{name: "sajjad", email: "1234"}
++++++++++++++++++++++++++++++++++++
+
+for making an array of structs you can use like maps:
++++++++++++++++++++++++++++++++++++
+var books = make([]userData, 0)
++++++++++++++++++++++++++++++++++++
+
+for getting an item from struct do this:
+++++++++++++++++++++++++++++++++
+fmt.Println(data.email)
+++++++++++++++++++++++++++++++++
+
+for editing struct do:
+++++++++++++++++++++++++++++++++
+data.email = "email@mm.com"
+++++++++++++++++++++++++++++++++
+
+-----------------------------------------------------------------------------------------------------
+
+defer:
+
+A defer statement defers the execution of a function until the surrounding function returns.
+
+The deferred call's arguments are evaluated immediately, but the function call is not executed until the surrounding function returns.
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+func main() {
+	defer fmt.Println("world")
+
+	fmt.Println("hello")
+}
++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+hello
+world
+
+
+Deferred function calls are pushed onto a stack. When a function returns, its deferred calls are executed in last-in-first-out order.
+++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("counting")
+
+	for i := 0; i < 10; i++ {
+		defer fmt.Println(i)
+	}
+
+	fmt.Println("done")
+}
+++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+counting
+done
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+
+--------------------------------------------------------------------------------------------------------------------
+
+until Pointers
