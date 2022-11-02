@@ -190,6 +190,8 @@ uint16    =>  ushort
 uint32    =>  uint
 uint64    =>  ulong
 
+int and uint are depend on system architect, if system is 32 bit, it's 32 and if 64 bit, it's 64
+
 -----------------------------------------------------------------------------------------------------
 
 pointers in Go
@@ -759,6 +761,31 @@ data.email = "email@mm.com"
 
 -----------------------------------------------------------------------------------------------------
 
+for installing new package run below command:
+
+go get <package-address>
+
+-----------------------------------------------------------------------------------------------------
+
+multiple string lines in go:
+
+str := `Select count(e.id) as count
+    FROM event AS e
+	INNER JOIN event_participants AS ep ON e.id = ep.eventFK
+	LEFT JOIN participant AS p ON ep.participantFK = p.id
+	LEFT JOIN tournament_stage AS ts ON ts.id = e.tournament_stageFK
+	LEFT JOIN tournament AS t ON t.id = ts.tournamentFK
+	LEFT JOIN tournament_template AS tt ON tt.id = t.tournament_templateFK
+	LEFT JOIN property AS e_prop ON e_prop.objectFK = e.id AND e_prop.object = "event" AND e_prop.type = "metadata"
+	LEFT JOIN lineup AS l ON ep.id = l.event_participantsFK
+    WHERE
+	tt.sportFK = 1 AND
+	e.status_type = "finished" AND
+    e.del = "no" AND
+    p.del = "no"
+    `
+
+-----------------------------------------------------------------------------------------------------
 defer:
 
 A defer statement defers the execution of a function until the surrounding function returns.
