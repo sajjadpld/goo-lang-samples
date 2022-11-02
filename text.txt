@@ -813,4 +813,72 @@ done
 
 --------------------------------------------------------------------------------------------------------------------
 
-until Pointers
+pointers:
+
+A pointer holds the memory address of a value.
+The type *T is a pointer to a T value. for function params we can use this:
+++++++++++++++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+func ptr(p *int) {
+	*p = 24
+}
+
+func main() {
+	i := 42
+
+	fmt.Println(i)
+	ptr(&i)
+	fmt.Println(i)
+}
+++++++++++++++++++++++++++++++++++++++
+output:
+42
+24
+
+The & operator generates a pointer to its operand. & return the variable memory address and we can put it in a variable and with * we can get the value of the memory address.
++++++++++++++++++++++++++++++++++++++++
+	i, j := 42, 2701
+
+	p := &i         // point to i
+	fmt.Println(*p) // read i through the pointer
+	fmt.Println(p)
+	*p = 21        // set i through the pointer
+	fmt.Println(i) // see the new value of i
+
+	p = &j         // point to j
+	*p = *p / 37   // divide j through the pointer
+	fmt.Println(j) // see the new value of j
++++++++++++++++++++++++++++++++++++++++
+output:
+42
+0xc0000140b0
+21
+73
+
+we can use pointer for struct:
+++++++++++++++++++++++++++++++++++++++++++++++++++
+package main
+
+import "fmt"
+
+type Vertex struct {
+	X int
+	Y int
+}
+
+func main() {
+	v := Vertex{1, 2}
+	p := &v
+	p.X = 3
+	fmt.Println(v)
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+{3 2}
+
+instead if p.X = 3 we can use (*p).X = 3.
+To access the field X of a struct when we have the struct pointer p we could write (*p).X. 
+However, that notation is cumbersome, so the language permits us instead to write just p.X, without the explicit dereference.
