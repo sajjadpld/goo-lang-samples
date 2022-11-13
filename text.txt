@@ -287,6 +287,61 @@ or use this instead of first line:
 
 books := []string{}
 
+
+we can slice an array indices like this:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+primes := [6]int{2, 3, 5, 7, 11, 13}
+
+fmt.Println(primes[1:4])
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+A slice is formed by specifying two indices, a low and high bound, separated by a colon:
+primes[low : high]
+This selects a half-open range which includes the first element, but excludes the last one.
+the output is:
+[3 5 7]
+output type is array
+
+these slice expressions are equivalent:
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+var a [10]int
+
+a[0:10]
+a[:10]
+a[0:]
+a[:]
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+The default is zero for the low bound and the length of the slice for the high bound.
+
+
+A slice does not store any data, it just describes a section of an underlying array.
+
+Changing the elements of a slice modifies the corresponding elements of its underlying array.
+
+Other slices that share the same underlying array will see those changes.
+
+A slice has both a length and a capacity.
+
+The length of a slice is the number of elements it contains.
+
+The capacity of a slice is the number of elements in the underlying array, counting from the first element in the slice.
+
+The length and capacity of a slice s can be obtained using the expressions len(s) and cap(s).
+
+
+for making an slice we can use both 2 ways:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+var sl []string
+
+or sl := make([]string, 0)
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+make() second param in length and the third param is capacity.
+
 -----------------------------------------------------------------------------------------------------------------
 
 in Go we jus have "for" for loop.
@@ -537,6 +592,78 @@ func fn() (int, string){
 use:
 in, st := fn()
 
+named return values:
+++++++++++++++++++++++++++
+func split(sum int) (x, y int) {
+	x = sum * 4 / 9
+	y = sum - x
+	return
+}
+++++++++++++++++++++++++
+A return statement without arguments returns the named return values. This is known as a "naked" return. They can harm readability in longer functions.
+
+
+function parameter can be another function!
+++++++++++++++++++++++++++++++++++++++++++++++
+
+func compute(fn func(float64, float64) float64) float64 {
+	return fn(3, 4)
+}
+
+func main() {
+	hypot := func(x, y float64) float64 {
+		return math.Sqrt(x*x + y*y)
+	}
+	fmt.Println(hypot(5, 12))
+
+	fmt.Println(compute(hypot))
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++
+output:
+13
+5
+
+
+Function closures:
+Go functions may be closures. A closure is a function value that references variables from outside its body. The function may access and assign to the referenced variables; in this sense the function is "bound" to the variables.
+
+For example, the adder function returns a closure. Each closure is bound to its own sum variable.
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+func adder() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
+}
+
+func main() {
+	pos, neg := adder(), adder()
+	for i := 0; i < 10; i++ {
+		fmt.Println(
+			pos(i),
+			neg(-2*i),
+		)
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+0 0
+1 -2
+3 -6
+6 -12
+10 -20
+15 -30
+21 -42
+28 -56
+36 -72
+45 -90
+
+
+
 -------------------------------------------------------------------------
 
 package level variables are variables that declared in package (not function) and can access in all functions:
@@ -709,6 +836,95 @@ for declare an array of map:
 var books = make([]map[string]string, 0)
 ++++++++++++++++++++++++++++++++++++
 the make function second param can be any number, because it makes slice and the size of slice increse.
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	Lat, Long float64
+}
+
+var m map[string]Vertex
+
+func main() {
+	m = make(map[string]Vertex)
+	m["Bell Labs"] = Vertex{
+		40.68433, -74.39967,
+	}
+	fmt.Println(m["Bell Labs"])
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+{40.68433 -74.39967}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	Lat, Long float64
+}
+
+var m = map[string]Vertex{
+	"Bell Labs": Vertex{
+		40.68433, -74.39967,
+	},
+	"Google": Vertex{
+		37.42202, -122.08408,
+	},
+}
+
+func main() {
+	fmt.Println(m)
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+map[Bell Labs:{40.68433 -74.39967} Google:{37.42202 -122.08408}]
+
+this is same :
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+var m = map[string]Vertex{
+	"Bell Labs": {40.68433, -74.39967},
+	"Google":    {37.42202, -122.08408},
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+for delete map key use delete(map_name, key).
+
+Test that a key is present with a two-value assignment:
+elem, ok = m[key]
+If key is in m, ok is true. If not, ok is false.
+
+If key is not in the map, then elem is the zero value for the map's element type.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+func main() {
+	m := make(map[string]int)
+
+	m["Answer"] = 42
+	fmt.Println("The value:", m["Answer"])
+
+	m["Answer"] = 48
+	fmt.Println("The value:", m["Answer"])
+
+	delete(m, "Answer")
+	fmt.Println("The value:", m["Answer"])
+
+	v, ok := m["Answer"]
+	fmt.Println("The value:", v, "Present?", ok)
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+output:
+The value: 42
+The value: 48
+The value: 0
+The value: 0 Present? false
+
+
 
 --------------------------------------------------------------------------------------------------------------
 
@@ -909,3 +1125,152 @@ output:
 instead if p.X = 3 we can use (*p).X = 3.
 To access the field X of a struct when we have the struct pointer p we could write (*p).X. 
 However, that notation is cumbersome, so the language permits us instead to write just p.X, without the explicit dereference.
+
+
+these two code are same:
+++++++++++++++++++++++++++++++++++++
+
+i := 42
+fmt.Println(*&i)
+
+++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++
+
+i := 42
+fmt.Println(i)
+
+++++++++++++++++++++++++++++++++++++
+
+both output is 42 !
+
+----------------------------------------------------------------------------------------------------------------------
+
+Methods:
+Go does not have classes. However, you can define methods on types.
+A method is a function with a special receiver argument.
+The receiver appears in its own argument list between the func keyword and the method name.
+In this example, the Abs method has a receiver of type Vertex named v:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+	v := Vertex{3, 4}
+	fmt.Println(v.Abs())
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+above code function is:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	X, Y float64
+}
+
+func Abs(v Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+	v := Vertex{3, 4}
+	fmt.Println(Abs(v))
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+You can declare a method on non-struct types, too.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type MyFloat float64
+
+func (f MyFloat) Abs() float64 {
+	if f < 0 {
+		return float64(-f)
+	}
+	return float64(f)
+}
+
+func main() {
+	f := MyFloat(-math.Sqrt2)
+	fmt.Println(f.Abs())
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+In this example we see a numeric type MyFloat with an Abs method.
+
+You can only declare a method with a receiver whose type is defined in the same package as the method. 
+You cannot declare a method with a receiver whose type is defined in another package (which includes the built-in types such as int).
+
+
+You can declare methods with pointer receivers.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func (v *Vertex) Scale(f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
+func main() {
+	v := Vertex{3, 4}
+	v.Scale(10)
+	fmt.Println(v.Abs())
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Methods with pointer receivers can modify the value to which the receiver points (as Scale does here). 
+Since methods often need to modify their receiver, pointer receivers are more common than value receivers.
+
+above code function is:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+type Vertex struct {
+	X, Y float64
+}
+
+func Abs(v Vertex) float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func Scale(v *Vertex, f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
+func main() {
+	v := Vertex{3, 4}
+	Scale(&v, 10)
+	fmt.Println(Abs(v))
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+There are two reasons to use a pointer receiver.
+The first is so that the method can modify the value that its receiver points to.
+The second is to avoid copying the value on each method call. This can be more efficient if the receiver is a large struct, for example.
+
+In general, all methods on a given type should have either value or pointer receivers, but not a mixture of both.
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+Interfaces:
+An interface type is defined as a set of method signatures.
+A value of interface type can hold any value that implements those methods.
