@@ -1,20 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"sync"
 )
 
-type userData struct {
-	name  string
-	email string
-}
-
 func main() {
-	data := userData{name: "sajjad", email: "1234"}
-	fmt.Println(data)
-	fmt.Println(data.email)
+	var wg sync.WaitGroup
 
-	data.email = "email@mm.com"
+	wg.Add(1)
 
-	fmt.Println(data.email)
+	go func() {
+		wg.Done()
+		wg.Add(1)
+	}()
+
+	wg.Wait()
 }
