@@ -1561,3 +1561,519 @@ func main() {
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 output:
 at 2009-11-10 23:00:00 +0000 UTC m=+0.000000001, it didn't work
+
+
+-------------------------------------------------------------------------------------------------
+
+Concurrency:
+
+below code is a sync program:
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+	task1()
+	task2()
+	task3()
+	task4()
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+}
+
+func task2() {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+}
+
+func task3() {
+	fmt.Println("task 3")
+}
+
+func task4() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+output is:
+task 1
+task 2
+task 3
+task 4
+finished at  400.863974ms
+
+async code of above code is:
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+	go task1()
+	go task2()
+	go task3()
+	go task4()
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+}
+
+func task2() {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+}
+
+func task3() {
+	fmt.Println("task 3")
+}
+
+func task4() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+output is:
+finished at  24.915µs
+
+with "go" keyword we can have async running, but task 1 to 4 function code body dosen't run, 
+because when the executer pointer when arive to the line that has "go" keyword, it makes a new thread and execution of that code run 
+in that thread and its alive until the main thread (function main) execution is alive and its not finished.
+for this reason, whene execution pointer arive to "go task1()", it makes a new thread for that and that thread wants to run task1() and execution pointer go to next line and make new thread
+for "go task2()" until "go task4()" and after that its print mesaage and after that main function is done and its close and all thread will be exit of ther execution!
+for fix this we must stop running of main thread untill all of goroutines (codes that run with "go" keyword) executed and after that execute rest of codes.
+use "sync.WaitGroup" for fixing this:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var wg sync.WaitGroup
+
+func main() {
+	now := time.Now()
+
+	wg.Add(4)
+
+	go task1()
+	go task2()
+	go task3()
+	go task4()
+
+	wg.Wait()
+
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+
+	wg.Done()
+}
+
+func task2() {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+	wg.Done()
+}
+
+func task3() {
+	fmt.Println("task 3")
+	wg.Done()
+}
+
+func task4() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+	wg.Done()
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+output is:
+task 3
+task 1
+task 4
+task 2
+finished at  200.377525ms
+
+wg.Add(4) is 4, because we opened 4 goroutines and at the end of each goroutine execution we must cal wg.Done(). after calling goroutine we must call wg.Wait().
+in other speache, when we use Add(N), in the background there is a variable with N value number. when we cal Done(), the variable value will decress 1, it will be N - 1.
+in Wait(), the main thread will wait until variable value in background is 0.
+
+we can write above code like this:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var wg sync.WaitGroup
+
+func main() {
+	now := time.Now()
+
+	wg.Add(4)
+
+	go func() {
+		task1()
+		wg.Done()
+	}()
+
+	go func() {
+		task2()
+		wg.Done()
+	}()
+
+	go func() {
+		task3()
+		wg.Done()
+	}()
+
+	go func() {
+		task4()
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+}
+
+func task2() {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+}
+
+func task3() {
+	fmt.Println("task 3")
+}
+
+func task4() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+output is same az above code
+
+it's better to write like this, don't add WaitGroup.Done() at the end of function code.
+
+we can use channel for do exact above code:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+
+	done := make(chan struct{})
+
+	go task1(done)
+	go task2(done)
+	go task3(done)
+	go task4(done)
+
+	<-done
+	<-done
+	<-done
+	<-done
+
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1(done chan struct{}) {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+
+	done <- struct{}{}
+}
+
+func task2(done chan struct{}) {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+
+	done <- struct{}{}
+}
+
+func task3(done chan struct{}) {
+	fmt.Println("task 3")
+
+	done <- struct{}{}
+}
+
+func task4(done chan struct{}) {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+
+	done <- struct{}{}
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+we can write above code like this:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+
+	done := make(chan struct{})
+
+	go func() {
+		task1()
+		done <- struct{}{}
+	}()
+
+	go func() {
+		task2()
+		done <- struct{}{}
+	}()
+
+	go func() {
+		task3()
+		done <- struct{}{}
+	}()
+
+	go func() {
+		task4()
+		done <- struct{}{}
+	}()
+
+	<-done
+	<-done
+	<-done
+	<-done
+
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+}
+
+func task2() {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+}
+
+func task3() {
+	fmt.Println("task 3")
+}
+
+func task4() {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+we make a channel with "make()" and at the end of execution of the thread code put value in channel by "<-".
+for wait main thread we must use "<-channel". as same as count of goroutines we must do this.
+
+
+this 2 types of code (WaitGroup and channel) are fork join model for concurrency.
+
+we can pass WaitGroup variable to a function and use that (like channels that we passed to function):
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+
+	var wg sync.WaitGroup
+
+	wg.Add(4)
+
+	go task1(&wg)
+	go task2(&wg)
+	go task3(&wg)
+	go task4(&wg)
+
+	wg.Wait()
+
+	fmt.Println("finished at ", time.Since(now))
+}
+
+func task1(wg *sync.WaitGroup) {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 1")
+
+	wg.Done()
+}
+
+func task2(wg *sync.WaitGroup) {
+	time.Sleep(200 * time.Millisecond)
+
+	fmt.Println("task 2")
+
+	wg.Done()
+}
+
+func task3(wg *sync.WaitGroup) {
+	fmt.Println("task 3")
+
+	wg.Done()
+}
+
+func task4(wg *sync.WaitGroup) {
+	time.Sleep(100 * time.Millisecond)
+
+	fmt.Println("task 4")
+
+	wg.Done()
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+unlike channel, which function param was value type, for WaitGroup function param must be pointer type! if you dont do this, you get panic (panic: sync: negative WaitGroup counter).
+
+
+
+Deadlock:
+when you add goroutine to your WaitGroup.Add() and never make new goroutine for that and wait for it, Deadlock happens!
+this means that we are waiting on something which never happens!
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	wg.Wait()
+
+	fmt.Println("Deadlock happend")
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+error is:
+fatal error: all goroutines are asleep - deadlock!
+
+
+
+negative WaitGroup counter:
+when you Done more than Add() counts, this panic happen!
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+
+	wg.Done()
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+error is:
+panic: sync: negative WaitGroup counter
+
+never Add befor goroutine execute finished:
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+
+	go func() {
+		wg.Done()
+		wg.Add(1)
+	}()
+
+	wg.Wait()
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+error is:
+panic: sync: WaitGroup is reused before previous Wait has returned
