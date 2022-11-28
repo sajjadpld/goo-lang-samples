@@ -2077,3 +2077,203 @@ func main() {
 +++++++++++++++++++++++++++++++++++++++++++++++
 error is:
 panic: sync: WaitGroup is reused before previous Wait has returned
+
+
+Atomics:
+when you have 2 goroutines and some variables are share between them and in goroutines you read or write them, its Race Condition that happend!
+
+Race Condition:
+when a variable is shared between some goroutines and in each of them the variable value change (at same time some goroutines can read and write the variable) and at the end, the value is different in each time of running code:
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type request func()
+
+func main() {
+	var counter int32
+	var wg sync.WaitGroup
+
+	wg.Add(4)
+
+	go func() {
+		defer wg.Done()
+		counter += 10
+	}()
+
+	go func() {
+		defer wg.Done()
+		counter -= 15
+	}()
+
+	go func() {
+		defer wg.Done()
+		counter = 100
+	}()
+
+	go func() {
+		defer wg.Done()
+		counter = 0
+	}()
+
+	wg.Wait()
+
+	fmt.Println(counter)
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+counter value is different in each time of execution!
+
+we can change above code with atomic!
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+)
+
+type request func()
+
+func main() {
+	var counter int32
+	var wg sync.WaitGroup
+
+	wg.Add(4)
+
+	go func() {
+		defer wg.Done()
+		atomic.StoreInt32(&counter, 10)
+	}()
+
+	go func() {
+		defer wg.Done()
+		atomic.StoreInt32(&counter, -15)
+	}()
+
+	go func() {
+		defer wg.Done()
+		atomic.StoreInt32(&counter, 100)
+	}()
+
+	go func() {
+		defer wg.Done()
+		atomic.StoreInt32(&counter, 0)
+	}()
+
+	wg.Wait()
+
+	fmt.Println(counter)
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+counter value is different in each time of execution!
+
+atomic functions:
+
+Store atomically stores val into *addr:
+
+	func StoreInt32(addr *int32, val int32)
+	func StoreInt64(addr *int64, val int64)
+	func StoreUint32(addr *uint32, val uint32)
+	func StoreUint64(addr *uint64, val uint64)
+	func StoreUintptr(addr *uintptr, val uintptr)
+	func StorePointer(addr *unsafe.Pointer, val unsafe.Pointer)
+
+Load atomically loads *addr:
+
+	func LoadInt32(addr *int32) (val int32)
+	func LoadInt64(addr *int64) (val int64)
+	func LoadUint32(addr *uint32) (val uint32)
+	func LoadUint64(addr *uint64) (val uint64)
+	func LoadUintptr(addr *uintptr) (val uintptr)
+	func LoadPointer(addr *unsafe.Pointer) (val unsafe.Pointer)
+
+Add atomically adds delta to *addr and returns the new value:
+
+	func AddInt32(addr *int32, delta int32) (new int32)
+	func AddUint32(addr *uint32, delta uint32) (new uint32)
+	func AddInt64(addr *int64, delta int64) (new int64)
+	func AddUint64(addr *uint64, delta uint64) (new uint64)
+	func AddUintptr(addr *uintptr, delta uintptr) (new uintptr)
+
+Swap atomically stores new into *addr and returns the previous *addr value:
+
+	func SwapInt32(addr *int32, new int32) (old int32)
+	func SwapInt64(addr *int64, new int64) (old int64)
+	func SwapUint32(addr *uint32, new uint32) (old uint32)
+	func SwapUint64(addr *uint64, new uint64) (old uint64)
+	func SwapUintptr(addr *uintptr, new uintptr) (old uintptr)
+	func SwapPointer(addr *unsafe.Pointer, new unsafe.Pointer) (old unsafe.Pointer)
+
+CompareAndSwap executes the compare-and-swap operation for an int32 value:
+
+	func CompareAndSwapInt32(addr *int32, old, new int32) (swapped bool)
+	func CompareAndSwapInt64(addr *int64, old, new int64) (swapped bool)
+	func CompareAndSwapUint32(addr *uint32, old, new uint32) (swapped bool)
+	func CompareAndSwapUint64(addr *uint64, old, new uint64) (swapped bool)
+	func CompareAndSwapUintptr(addr *uintptr, old, new uintptr) (swapped bool)
+	func CompareAndSwapPointer(addr *unsafe.Pointer, old, new unsafe.Pointer) (swapped bool)
+
+
+we can use atomic for different types by "atomic.Value":
++++++++++++++++++++++++++++++++++++++++++++++++
+
+package main
+
+import (
+	"fmt"
+	"log"
+	"sync"
+	"sync/atomic"
+)
+
+type Config struct {
+	a []int
+}
+
+func main() {
+	var wg sync.WaitGroup
+	var v atomic.Value
+	// to avoid panics when we do type assertion
+	v.Store(Config{a: []int{}})
+
+	// writer
+	go func() {
+		var i int
+		for {
+			i++
+			cfg := Config{
+				a: []int{i + 1, i + 2, i + 3, i + 4, i + 5},
+			}
+			v.Store(cfg)
+		}
+	}()
+
+	// reader
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go func() {
+			defer wg.Done()
+			// we're gonna get a panic this way
+			// cfg := v.Load().(Config)
+			cfg, ok := v.Load().(Config)
+			if !ok {
+				log.Fatalf("received different type: %T", cfg)
+			}
+			fmt.Println("cfg", cfg)
+		}()
+	}
+	wg.Wait()
+}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+store type must be same in program.
+if store nil, you get Panic!
