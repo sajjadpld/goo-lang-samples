@@ -1,49 +1,29 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-	"sync/atomic"
-)
+import "fmt"
 
-type student struct {
-	grades map[string]int
+func main() {
+	f()
+	fmt.Println("Returned normally from f.")
 }
 
-// to test this program, make sure to run it using the -race flag
-// go run -race main.go
-func main() {
-	var wg sync.WaitGroup
-	var val atomic.Value
-	val.Store(student{grades: map[string]int{}})
+func f() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+		}
+	}()
+	fmt.Println("Calling g.")
+	g(0)
+	fmt.Println("Returned normally from g.")
+}
 
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		s := val.Load().(student)
-		m := s.grades
-		m["English"] = 10
-		val.Store(student{grades: m})
-		//s.grades["English"] = 10
-	}()
-	go func() {
-		defer wg.Done()
-		s := val.Load().(student)
-		m := s.grades
-		m["Math"] = 8
-		val.Store(student{grades: m})
-		//s.grades["Math"] = 8
-	}()
-	go func() {
-		defer wg.Done()
-		s := val.Load().(student)
-		m := s.grades
-		m["Physics"] = 7
-		val.Store(student{grades: m})
-		//s.grades["Physics"] = 7
-	}()
-
-	wg.Wait()
-	s := val.Load().(student)
-	fmt.Println(s)
+func g(i int) {
+	if i > 3 {
+		fmt.Println("Panicking!")
+		panic(fmt.Sprintf("%v", i))
+	}
+	defer fmt.Println("Defer in g", i)
+	fmt.Println("Printing in g", i)
+	g(i + 1)
 }
